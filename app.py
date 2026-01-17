@@ -56,3 +56,9 @@ if uploaded_file:
                 result_placeholder.dataframe(results, use_container_width=True)
 
         st.success("Fact-checking complete!")
+
+st.markdown("---")
+st.markdown(
+    "Made with by **Arnav** ~ "
+)
+
