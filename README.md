@@ -7,14 +7,6 @@
 
 ---
 
-🎥 **Demo Video:**  
-👉 *[PASTE YOUR DEMO VIDEO LINK HERE]*
-
-🌐 **Live App url:**  
-👉 *https://fact-llm-checker-arnav.streamlit.app/*
-
----
-
 ## Project Overview
 
 This project is an **AI-powered fact-checking web application** that automatically extracts factual claims from uploaded pdf documents and verifies them against **live web data**.
@@ -23,6 +15,17 @@ It is designed to detect:
 - ❌ **False claims**
 - ⚠️ **Inaccurate information**
 - ✅ **Verified facts**
+
+---
+
+🌐 **Live App url:**  
+👉 *https://fact-llm-checker-arnav.streamlit.app/*
+
+▶️ **Demo Video:** 
+ 
+Click here👇
+
+[![Watch the demo](https://img.youtube.com/vi/8PzJ3hQteSg/hqdefault.jpg)](https://youtu.be/8PzJ3hQteSg)
 
 ---
 
