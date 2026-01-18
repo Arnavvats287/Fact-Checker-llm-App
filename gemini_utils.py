@@ -2,6 +2,7 @@ import json
 import re
 from langchain_google_genai import ChatGoogleGenerativeAI
 
+
 class FactChecker:
     def __init__(self, api_key: str):
         self.llm = ChatGoogleGenerativeAI(
@@ -21,20 +22,37 @@ Web evidence:
 "{web_context}"
 
 Decision rules (VERY IMPORTANT):
-- VERIFIED → Only if the claim is explicitly confirmed as factual by reliable sources
-- INACCURATE → If the claim is partially true, outdated, speculative, or imprecise
-- FALSE → If the claim is contradicted, unsupported, or refers to an event that has not occurred
 
-Additional constraints:
-- Predictions, opinions, forecasts, or rumors are NEVER VERIFIED
-- Future events are NEVER VERIFIED
-- If evidence is mixed or unclear → INACCURATE
+Classification definitions:
+- VERIFIED:
+  The claim is explicitly confirmed by the provided evidence.
+  This INCLUDES future events if the claim correctly states they are scheduled or planned.
+
+- INACCURATE:
+  The claim is partially correct but contains errors such as:
+  • wrong date or year
+  • outdated statistics
+  • overstating certainty
+  • claiming completion when evidence says scheduled
+  • forecasts or predictions treated as facts
+  • mixed or unclear evidence
+
+- FALSE:
+  The claim is directly contradicted by evidence
+  OR has no supporting evidence
+  OR claims an event already happened when it has not occurred.
+
+Important constraints:
+- Future events are NOT automatically false
+- Future events are VERIFIED only if explicitly described as scheduled/planned
+- Predictions, opinions, and speculation are NEVER VERIFIED
+- If unsure → choose INACCURATE
 - Be conservative: prefer INACCURATE over VERIFIED
 - Use ONLY the provided web evidence
 - Do NOT add external knowledge
 - Do NOT hallucinate
 
-Return ONLY valid JSON in the following format:
+Return ONLY valid JSON in this format:
 
 {{
   "status": "VERIFIED | INACCURATE | FALSE",
@@ -46,19 +64,23 @@ Return ONLY valid JSON in the following format:
         response = self.llm.invoke(prompt)
         content = response.content.strip()
 
+        # Attempt direct JSON parse
         try:
             return json.loads(content)
         except json.JSONDecodeError:
-            # Fallback: extract JSON if model wraps it in text
-            match = re.search(r"\{.*\}", content, re.DOTALL)
-            if match:
-                try:
-                    return json.loads(match.group())
-                except json.JSONDecodeError:
-                    pass
+            pass
 
-            return {
-                "status": "ERROR",
-                "explanation": content,
-                "corrected_fact": ""
-            }
+        # Fallback: extract JSON safely
+        match = re.search(r"\{[\s\S]*\}", content)
+        if match:
+            try:
+                return json.loads(match.group())
+            except json.JSONDecodeError:
+                pass
+
+        # Absolute fallback (never crash app)
+        return {
+            "status": "ERROR",
+            "explanation": content,
+            "corrected_fact": ""
+        }
